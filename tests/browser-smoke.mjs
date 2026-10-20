@@ -32,6 +32,9 @@ try {
   await page.locator("#close-map").click();
   await page.locator("#overlay").waitFor({state:"visible"});
   await fs.mkdir("artifacts",{recursive:true});
+  // Capture the actual scene instead of the startup modal.
+  await page.locator("#overlay").evaluate(el => el.classList.add("hidden"));
+  await page.waitForTimeout(400);
   await page.screenshot({path:"artifacts/baiterek-v1.png",fullPage:true});
   assert.deepEqual(errors,[],"Uncaught browser exceptions");
   console.log(JSON.stringify({smoke:"PASS",fps,mapCanvas:size,errors}));
