@@ -6,6 +6,6 @@
   "description": "Zero-cost geospatial browser FPS prototype",
   "scripts": {
     "test": "node --test tests/*.test.cjs",
-    "check": "node --check game.js && npm test"
+    "check": "node --check game.js && node --check baiterek.js && npm test"
   }
 }
