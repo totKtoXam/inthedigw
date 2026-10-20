@@ -4,42 +4,89 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0a121c">
-  <title>IN THE DIGITAL WORLD · Free-roam FPS</title>
+  <title>IN THE DIGITAL WORLD · Байтерек v1</title>
   <link rel="stylesheet" href="./style.css">
   <script type="importmap">
   { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js" } }
   </script>
 </head>
 <body>
-  <main id="viewport" aria-label="3D игровой мир"></main>
-  <div id="topbar">
-    <div class="brand"><span class="mark">◎</span><div><strong>IN THE DIGITAL WORLD</strong><small>REAL-WORLD FPS / PROTOTYPE 0.1</small></div></div>
-    <div class="top-controls">
-      <label>ГОРОД <select id="city"><option value="astana">Астана · Байтерек</option><option value="almaty">Алматы · центр</option><option value="paris">Париж · Эйфелева башня</option></select></label>
-      <label>КАЧЕСТВО <select id="quality"><option value="low">Экономное · Intel Arc</option><option value="medium">Сбалансированное</option><option value="high">Высокое</option></select></label>
-      <button id="reload" title="Повторно загрузить данные OSM">↻ Данные</button>
+  <main id="viewport" aria-label="Трёхмерная сцена Байтерека"></main>
+
+  <header id="topbar">
+    <div class="brand">
+      <span class="mark">◎</span>
+      <div><strong>IN THE DIGITAL WORLD</strong><small>АСТАНА · БАЙТЕРЕК / LEVEL 01</small></div>
     </div>
-  </div>
+    <div class="top-controls">
+      <span class="city-label">ЛОКАЦИЯ <strong>Байтерек · Астана</strong></span>
+      <label>КАЧЕСТВО
+        <select id="quality" aria-label="Качество графики">
+          <option value="low" selected>Intel Arc · Экономное</option>
+          <option value="medium">Сбалансированное</option>
+          <option value="high">Высокое</option>
+        </select>
+      </label>
+      <button id="reload" type="button" title="Вернуться в начало">↻ Начало</button>
+      <button id="map-toggle" type="button" title="Открыть карту (M)">▣ Карта</button>
+    </div>
+  </header>
+
   <section id="hud" aria-live="polite">
-    <div class="eyebrow">TELEMETRY</div>
-    <div class="metrics"><span><strong id="fps">—</strong><small>FPS</small></span><span><strong id="objects">—</strong><small>ЗДАНИЙ</small></span><span><strong id="meters">0</strong><small>М ОТ СТАРТА</small></span></div>
-    <div id="coordinates">Координаты: —</div>
-    <div id="world-source">Подготовка сцены...</div>
+    <div class="eyebrow">БАЙТЕРЕК / TELEMETRY</div>
+    <div class="metrics">
+      <span><strong id="fps">—</strong><small>FPS</small></span>
+      <span><strong id="objects">1</strong><small>ЛОКАЦИЙ</small></span>
+      <span><strong id="meters">0</strong><small>М ОТ СТАРТА</small></span>
+    </div>
+    <div id="coordinates">51.12829° N, 71.43046° E</div>
+    <div id="world-source">Архитектурная 3D-реконструкция Байтерека</div>
   </section>
   <div id="crosshair" aria-hidden="true"><i></i><i></i></div>
-  <canvas id="minimap" width="184" height="184" aria-label="Миникарта"></canvas>
-  <div id="attribution">Геоданные: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors · ODbL</a> · Текстуры: процедурные</div>
-  <div id="toast" role="status"></div>
-  <div id="overlay">
-    <div class="hero">
-      <div class="hero-tag">EXPERIMENTAL · ZERO-COST · NO API KEYS</div>
-      <h1>Весь город.<br><em>Твоими глазами.</em></h1>
-      <p>Свободное FPS-перемещение по улицам настоящих городов. Дома и дороги загружаются из OpenStreetMap. Визуальные фасады пока процедурные — это не фотосканирование Street View.</p>
-      <div id="load-message" class="load-message">Подключаемся к OpenStreetMap...</div>
-      <button id="play" type="button">ВОЙТИ В МИР <span>↗</span></button>
-      <div class="keys"><span><b>W A S D</b> Ходьба</span><span><b>МЫШЬ</b> Обзор</span><span><b>SHIFT</b> Бег</span><span><b>SPACE</b> Прыжок</span><span><b>ESC</b> Пауза</span><span><b>M</b> Миникарта</span></div>
-    </div>
+  <canvas id="minimap" width="184" height="184" role="button" tabindex="0"
+          aria-label="Открыть подробную карту площади"></canvas>
+  <div id="minimap-note">M — карта</div>
+  <div id="attribution">
+    <a href="https://a-vm.kz/objects/bayterek/" target="_blank" rel="noopener noreferrer">
+      Байтерек · размеры и референсы
+    </a> · 3D-модель создана для этого прототипа
   </div>
+  <div id="toast" role="status"></div>
+
+  <section id="map-expanded" hidden aria-label="Большая карта локации" role="dialog"
+           aria-modal="true">
+    <div class="fullmap-shell">
+      <div class="fullmap-header">
+        <div><strong>БАЙТЕРЕК · ПЛОЩАДЬ</strong><small>Схема игровой зоны · 400 × 400 метров</small></div>
+        <button id="close-map" type="button" aria-label="Закрыть карту">✕ Закрыть</button>
+      </div>
+      <canvas id="fullmap-canvas" width="600" height="600"
+              aria-label="Масштабная схема локации Байтерек"></canvas>
+      <p>Жёлтый круг — Байтерек · Бирюзовая стрелка — игрок · Нажми M, чтобы открыть/закрыть.</p>
+    </div>
+  </section>
+
+  <section id="overlay">
+    <div class="hero">
+      <div class="hero-tag">БЕСПЛАТНО · 3D · НИКАКИХ API-КЛЮЧЕЙ</div>
+      <h1>Байтерек.<br><em>В масштабе 1:1.</em></h1>
+      <p>Исследуй узнаваемый монумент Астаны с камерой от первого лица.
+      Высота сооружения — 105 метров, золотой шар — 22 метра.
+      Архитектура смоделирована вручную по реальным пропорциям.
+      Озеленение и планировка пока являются художественной реконструкцией,
+      а не официальной цифровой копией площади.</p>
+      <div id="load-message" class="load-message">Загрузка модели монумента...</div>
+      <button id="play" type="button">ПРОГУЛЯТЬСЯ К БАЙТЕРЕКУ <span>↗</span></button>
+      <div class="keys">
+        <span><b>W A S D</b> Ходьба</span>
+        <span><b>МЫШЬ</b> Обзор</span>
+        <span><b>SHIFT</b> Бег</span>
+        <span><b>SPACE</b> Прыжок</span>
+        <span><b>M</b> Карта</span>
+        <span><b>ESC</b> Пауза</span>
+      </div>
+    </div>
+  </section>
   <script type="module" src="./game.js"></script>
 </body>
 </html>
